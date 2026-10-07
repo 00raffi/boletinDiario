@@ -1,0 +1,53 @@
+# Datos personales y resultados locales: PDFs, biblioteca SQLite, resúmenes,
+# preferencias, notas, respaldos y artefactos de validación.
+/data/
+*.pdf
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+*.db
+*.db-shm
+*.db-wal
+
+# Entornos, bytecode y cachés de Python.
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Archivos generados al instalar o empaquetar el proyecto.
+*.egg-info/
+build/
+dist/
+
+# Secretos y configuración privada. Las plantillas de ejemplo sí se versionan.
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs, temporales y ajustes locales de editores/sistema operativo.
+*.log
+*.pid
+*.tmp
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

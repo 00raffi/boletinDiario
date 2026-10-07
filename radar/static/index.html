@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173e38">
+  <title>Lecturas y notas de investigación</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <p class="project-description">Lecturas y notas de investigación, guardadas en tu equipo.</p>
+    <div class="nav-label">EXPLORAR</div>
+    <nav aria-label="Navegación principal">
+      <a href="#home" data-view="home"><span>▤</span> Boletín diario</a>
+      <a href="#library" data-view="library"><span>▦</span> Biblioteca</a>
+      <a href="#activity" data-view="activity"><span>◷</span> Actividad</a>
+      <a href="#settings" data-view="settings"><span>⚙</span> Configuración</a>
+    </nav>
+    <div class="processing-status" id="processing-status">
+      <div id="progress-indicator" class="progress-indicator" aria-label="Sin tareas en curso"></div>
+      <div class="processing-copy"><div id="statusbar" class="processing-message" role="status">Conectando con el servicio…</div><a id="processing-title" class="processing-title" hidden></a><div id="progress-count" class="progress-count" hidden></div></div>
+    </div>
+  </aside>
+  <main>
+    <header class="topbar"><span id="breadcrumb">Boletín diario</span><span class="chip">LOCAL</span></header>
+    <div id="content" aria-live="polite"></div>
+    <footer>Las síntesis pueden contener errores. Consulta siempre el documento original.</footer>
+  </main>
+  <div id="toast" role="alert" hidden></div>
+</body>
+</html>
