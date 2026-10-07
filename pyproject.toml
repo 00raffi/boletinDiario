@@ -3,7 +3,7 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "paper-radar"
+name = "boletinDiario"
 version = "0.1.0"
 description = "Observatorio local de investigación con arXiv y Ollama"
 requires-python = ">=3.11"
@@ -19,10 +19,10 @@ dependencies = [
 test = ["pytest>=8,<10"]
 
 [project.scripts]
-paper-radar = "radar.__main__:main"
+boletinDiario = "boletinDiario.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["radar*"]
+include = ["radar*", "boletinDiario*"]
 
 [tool.setuptools.package-data]
 radar = ["static/*"]

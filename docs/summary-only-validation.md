@@ -48,7 +48,7 @@ Se comprobó que no había búsqueda, inferencia ni compilación de intereses ac
 Respaldo consistente:
 `data/validation/summary-only-20261006/before-171309.sqlite3`.
 
-Tras reiniciar únicamente `paper-radar.service`, ambos servicios de usuario están
+Tras reiniciar únicamente el servicio de la aplicación, ambos servicios de usuario están
 activos. Se encolaron ocho resúmenes para el boletín visible (6 Colibrí y 2 arXiv),
 no para todo el archivo. Job 51 comenzó automáticamente con ParaKit, usando el PDF
 ya guardado; el estado inicial detectó nueve secciones. Se dejó continuar sin

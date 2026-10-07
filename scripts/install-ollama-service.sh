@@ -3,8 +3,8 @@ set -euo pipefail
 # Instancia exclusiva de inferencia: no cambia ni detiene el Ollama de sistema.
 MODELS="${OLLAMA_MODELS_DIR:-/usr/share/ollama/.ollama/models}"
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-UNIT="$HOME/.config/systemd/user/paper-radar-ollama.service"
-DROPIN="$HOME/.config/systemd/user/paper-radar.service.d/ollama.conf"
+UNIT="$HOME/.config/systemd/user/boletinDiario-ollama.service"
+DROPIN="$HOME/.config/systemd/user/boletinDiario.service.d/ollama.conf"
 OLLAMA="$(command -v ollama)"
 for value in "$MODELS" "$OLLAMA" "$ROOT"; do
   if [[ "$value" == *'"'* || "$value" == *'%'* || "$value" == *$'\n'* || "$value" == *'\'* ]]; then
@@ -20,8 +20,8 @@ if [[ -e "$UNIT" || -e "$DROPIN" ]]; then
   echo 'Ya existe la unidad o el complemento de Ollama. Revísalos antes de sobrescribirlos.' >&2
   exit 1
 fi
-if [[ ! -e "$HOME/.config/systemd/user/paper-radar.service" ]]; then
-  echo 'Instala primero paper-radar.service con scripts/install-service.sh.' >&2
+if [[ ! -e "$HOME/.config/systemd/user/boletinDiario.service" ]]; then
+  echo 'Instala primero boletinDiario.service con scripts/install-service.sh.' >&2
   exit 1
 fi
 if [[ ! -x "$ROOT/.venv/bin/python" ]]; then
@@ -39,8 +39,8 @@ PY
 mkdir -p "$(dirname "$UNIT")" "$(dirname "$DROPIN")"
 cat > "$UNIT" <<EOF
 [Unit]
-Description=Ollama local exclusivo para Paper Radar
-Before=paper-radar.service
+Description=Ollama local exclusivo para boletinDiario
+Before=boletinDiario.service
 
 [Service]
 Type=simple
@@ -69,13 +69,13 @@ WantedBy=default.target
 EOF
 cat > "$DROPIN" <<'EOF'
 [Unit]
-Requires=paper-radar-ollama.service
-After=paper-radar-ollama.service
+Requires=boletinDiario-ollama.service
+After=boletinDiario-ollama.service
 
 [Service]
 Environment=RADAR_OLLAMA_HOST=http://127.0.0.1:11435
 EOF
 systemctl --user daemon-reload
-systemctl --user enable --now paper-radar-ollama.service
+systemctl --user enable --now boletinDiario-ollama.service
 echo 'Ollama dedicado activo en 127.0.0.1:11435. No se modificó el servicio de sistema.'
-echo 'Reinicia Paper Radar cuando no haya tareas activas para adoptar el endpoint.'
+echo 'Reinicia la aplicación cuando no haya tareas activas para adoptar el endpoint.'

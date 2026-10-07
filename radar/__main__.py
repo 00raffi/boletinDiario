@@ -5,7 +5,7 @@ import uvicorn
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Paper Radar: interfaz local y coordinador diario")
+    parser = argparse.ArgumentParser(prog="boletinDiario", description="boletinDiario: interfaz local y coordinador diario")
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
     os.umask(0o077)

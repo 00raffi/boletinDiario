@@ -57,7 +57,7 @@ de deprecación ya conocida de Starlette/TestClient.
 
 Respaldo previo:
 `data/validation/arxiv-resume-20261007/before-130219.sqlite3`.
-Se reinició únicamente `paper-radar.service` después de verificar que no había
+Se reinició únicamente el servicio de la aplicación después de verificar que no había
 búsqueda, resumen o propuesta de intereses activos. El servicio Ollama dedicado
 no se reinició. La única pausa levantada fue la espera **local** del error de
 5000 metadatos ya corregido; no había pausa HTTP de arXiv que saltar.

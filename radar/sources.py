@@ -245,7 +245,7 @@ class ArxivSource(RequestSource):
         requests = 0
         error = None
         async with httpx.AsyncClient(timeout=60, trust_env=False,
-                                     headers={"User-Agent": "PaperRadar/0.1 (personal local reader)"}) as client:
+                                     headers={"User-Agent": "boletinDiario/0.1 (personal local reader)"}) as client:
             while not state["complete"] and requests < self.request_budget:
                 unit = state["units"][state["next"]]
                 try:

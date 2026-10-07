@@ -37,7 +37,7 @@ def create_app(data_dir=DATA_DIR, *, start_engine=True):
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             lock.close()
-            raise RuntimeError("Ya hay un servicio Paper Radar usando esta base de datos.")
+            raise RuntimeError("Ya hay una instancia de la aplicación usando esta base de datos.")
         if start_engine:
             await engine.start()
         try:
@@ -46,7 +46,7 @@ def create_app(data_dir=DATA_DIR, *, start_engine=True):
             await engine.stop()
             lock.close()
 
-    app = FastAPI(title="Lecturas de investigación", lifespan=lifespan, docs_url=None, redoc_url=None)
+    app = FastAPI(title="boletinDiario", lifespan=lifespan, docs_url=None, redoc_url=None)
     app.state.db = db
     app.state.engine = engine
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "[::1]"])
@@ -132,7 +132,7 @@ def create_app(data_dir=DATA_DIR, *, start_engine=True):
         try:
             return {"entries": await engine.sources["colibri"].browse(request.parent)}
         except httpx.HTTPError as exc:
-            raise HTTPException(503, "No se pudo consultar el catálogo público de Colibrí; respeta la pausa indicada en Actividad.") from exc
+            raise HTTPException(503, "No se pudo consultar el catálogo público de Colibrí. La fuente puede estar en pausa; inténtalo más tarde.") from exc
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
 
@@ -292,7 +292,7 @@ def create_app(data_dir=DATA_DIR, *, start_engine=True):
             url, _ = await engine.sources["colibri"].resolve_pdf(paper)
             return {"url": url}
         except httpx.HTTPError as exc:
-            raise HTTPException(503, "Colibrí no permitió resolver el PDF. Consulta la ficha original y las pausas de Actividad.") from exc
+            raise HTTPException(503, "Colibrí no permitió resolver el PDF. Consulta la ficha original o inténtalo más tarde si la fuente está en pausa.") from exc
         except ValueError as exc:
             raise HTTPException(422, str(exc)) from exc
 
@@ -326,12 +326,13 @@ def create_app(data_dir=DATA_DIR, *, start_engine=True):
 
     @app.get("/api/activity")
     async def activity():
+        job_limit = db.settings().bulletin_limit
         return {"runs": db.rows("SELECT * FROM runs ORDER BY id DESC LIMIT 30"),
                   "jobs": db.rows("""SELECT j.*,p.title FROM jobs j JOIN papers p ON p.id=j.paper_id
                       WHERE j.kind='summary'
                      ORDER BY CASE j.status WHEN 'running' THEN 0 WHEN 'queued' THEN 1 ELSE 2 END,
-                     CASE WHEN j.status='queued' THEN j.created_at END ASC,j.updated_at DESC,j.id DESC LIMIT 10"""),
-                  "jobs_total": db.rows("SELECT count(*) AS n FROM jobs WHERE kind='summary'")[0]["n"], "job_limit": 10}
+                     CASE WHEN j.status='queued' THEN j.created_at END ASC,j.updated_at DESC,j.id DESC LIMIT ?""", (job_limit,)),
+                  "jobs_total": db.rows("SELECT count(*) AS n FROM jobs WHERE kind='summary'")[0]["n"], "job_limit": job_limit}
 
     @app.get("/api/papers/{paper_id}/export")
     async def export(paper_id: int):

@@ -270,7 +270,7 @@ de configuración ni se deben confundir con `recycle_every_chunks`.
 ```
 
 Requiere la biblioteca local y el PDF descargado, Ollama principal sin modelos
-cargados y Paper Radar sin tareas/búsqueda en curso. No ejecutar otras inferencias
+cargados y la aplicación sin tareas/búsqueda en curso. No ejecutar otras inferencias
 simultáneas. Es opt-in; tarda varios minutos y consume CPU.
 
 La prueba inicia una instancia temporal en loopback con los modelos ya instalados

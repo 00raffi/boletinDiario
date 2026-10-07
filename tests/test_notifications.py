@@ -58,6 +58,7 @@ def test_native_notification_uses_argv_not_shell(monkeypatch):
     assert asyncio.run(DesktopNotifier().test())["status"] == "sent"
     args, kwargs = spawn.call_args
     assert args[0] == "/usr/bin/notify-send"
+    assert "--app-name=boletinDiario" in args
     assert "--" in args
     assert "shell" not in kwargs
 

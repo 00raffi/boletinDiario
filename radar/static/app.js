@@ -120,7 +120,7 @@ async function home() {
   ];
   node.append(el("div", {class:"metrics"}, metrics.map(([label,value,hint]) => el("div", {class:"metric"}, el("label",{},label),el("strong",{},value),el("small",{},hint)))));
   const latest = activity.runs[0];
-   if (["error","partial"].includes(latest?.status)) node.append(el("div", {class:"notice warn"}, "La última búsqueda tuvo un problema: ", latest.error, " · La otra fuente puede seguir funcionando. Consulta las pausas por fuente en Actividad."));
+   if (["error","partial"].includes(latest?.status)) node.append(el("div", {class:"notice warn"}, "La última búsqueda tuvo un problema: ", latest.error, " · La otra fuente puede seguir funcionando. Las pausas se respetan automáticamente."));
   node.append(el("div", {class:"section-title"}, el("h2", {}, "Tu último boletín"), el("span", {class:"muted"}, bulletin.run ? date(bulletin.run.started_at) : "Esperando la primera búsqueda")));
   if (bulletin.papers.length) {
     for(const source of ["colibri","arxiv"]){
@@ -223,20 +223,11 @@ async function paper(id) {
 }
 async function activity() {
   const data = await api("activity");
-  const node = el("div",{},hero("Actividad","Búsquedas por fuente y generación de resúmenes."));
-  node.append(el("div",{class:"settings-grid"},["colibri","arxiv"].map(source=>{
-    const info=status.sources?.[source] || {};
-    const retry=[info.retry_after,info.network?.until].filter(t=>t && new Date(t).getTime()>Date.now()).sort().at(-1);
-    return el("section",{class:"panel"},el("h2",{},sourceName(source)),el("p",{},`${info.requests_today || 0} solicitudes externas registradas hoy (UTC), incluidas catálogo, metadatos y PDFs.`),
-      el("p",{class:"coverage"},`Último recorrido completo: ${date(info.last_scan,true)}`),
-      info.discovery ? el("p",{class:info.discovery.complete ? "coverage" : "notice"},`${info.discovery.complete ? "Recorrido completado" : "Recorrido parcial guardado"}: ${info.discovery.pages} páginas · ${info.discovery.saved} registros nuevos guardados · ${info.discovery.completed_groups} de ${info.discovery.groups} grupos completados.${info.discovery.complete ? "" : " Se continuará desde el punto guardado, sin repetir todo."}`) : null,
-      retry ? el("p",{class:"notice warn"},`Pausa hasta ${date(retry,true)}. No se insiste durante esta pausa.`) : null,
-      info.error ? el("p",{class:"error-text"},info.error) : null);
-  })));
-  node.append(el("div",{class:"panel"},el("h2",{},"Búsquedas"),data.runs.length ? data.runs.map(run=>el("div",{class:"activity-item"},tag(labels[run.status] || run.status,run.status==="error"?"amber":""),el("p",{},`${date(run.started_at,true)} · ${run.reason === "scheduled" ? "Programada" : run.reason === "regenerated" ? "Regeneración local" : "Manual"} · ${run.found} nuevos registros · ${run.selected} seleccionados`),run.error ? el("p",{class:"error-text"},run.error) : null)) : el("p",{class:"muted"},"Todavía no hay consultas.")));
-  const jobs=data.jobs.slice(0,10);
-  node.append(el("div",{class:"panel",id:"processing-queue"},el("h2",{},"Cola de procesamiento"),el("p",{class:"coverage"},`Mostrando ${jobs.length} de ${data.jobs_total ?? data.jobs.length} tareas guardadas. Máximo 10; primero las que están en curso o en cola.`),jobs.length ? jobs.map(job=>el("div",{class:"activity-item"},el("a",{href:`#paper/${job.paper_id}`},job.title),el("p",{},`${jobName(job.kind)} · ${labels[job.status] || job.status} · ${job.progress || ""}`),job.error ? el("p",{class:"error-text"},job.error) : null,cancelButton(job),["error","cancelled"].includes(job.status) ? button("Reintentar",()=>api(`papers/${job.paper_id}/jobs/${job.kind}`,{method:"POST"})) : null)) : el("p",{class:"muted"},"No hay tareas en cola.")));
-  return {node,data:JSON.stringify(data)};
+  const node = el("div",{},hero("Actividad","Procesamiento de artículos y generación de resúmenes."));
+  const limit=data.job_limit ?? settings.bulletin_limit;
+  const jobs=data.jobs.slice(0,limit);
+  node.append(el("div",{class:"panel",id:"processing-queue"},el("h2",{},"Artículos en procesamiento y procesados"),el("p",{class:"coverage"},`Mostrando ${jobs.length} de ${data.jobs_total ?? data.jobs.length} artículos con tareas guardadas. Máximo ${limit}, según el cupo diario del boletín; primero los que están en curso o en cola y después los más recientes.`),jobs.length ? jobs.map(job=>el("div",{class:"activity-item"},el("a",{href:`#paper/${job.paper_id}`},job.title),el("p",{},`${jobName(job.kind)} · ${labels[job.status] || job.status} · ${job.progress || ""}`),job.error ? el("p",{class:"error-text"},job.error) : null,cancelButton(job),["error","cancelled"].includes(job.status) ? button("Reintentar",()=>api(`papers/${job.paper_id}/jobs/${job.kind}`,{method:"POST"})) : null)) : el("p",{class:"muted"},"Todavía no hay artículos procesados ni en cola.")));
+  return {node,data:JSON.stringify([jobs,data.jobs_total,limit])};
 }
 function field(label, input, hint = "") {return el("div",{class:"field"},el("label",{htmlFor:input.id},label),input,hint ? el("small",{},hint) : null);}
 function interestBreakdown(proposal){

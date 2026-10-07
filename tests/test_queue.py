@@ -11,10 +11,12 @@ from radar.db import utcnow
 from radar.engine import Engine
 
 
-def test_activity_shows_ten_and_prioritizes_pending_without_deleting_history(tmp_path, sample):
+@pytest.mark.parametrize("limit", [1, 10, 15, 30])
+def test_activity_matches_daily_quota_and_prioritizes_pending_without_deleting_history(tmp_path, sample, limit):
     app = create_app(tmp_path, start_engine=False)
     db = app.state.db
-    for number in range(15):
+    db.set_meta("settings", {**db.settings().model_dump(), "bulletin_limit": limit})
+    for number in range(35):
         paper_id = db.add_papers([replace(sample, external_id=f"test-{number}")])[0]
         db.queue(paper_id, "summary")
     db.execute("UPDATE jobs SET status='done',updated_at='2099-01-01T00:00:00+00:00'")
@@ -22,11 +24,46 @@ def test_activity_shows_ten_and_prioritizes_pending_without_deleting_history(tmp
     db.execute("UPDATE jobs SET status='queued' WHERE id IN (2,3)")
     with TestClient(app, base_url="http://localhost") as client:
         data = client.get("/api/activity").json()
-        assert data["job_limit"] == 10 and data["jobs_total"] == 15
-        assert len(data["jobs"]) == 10
+        assert data["job_limit"] == limit and data["jobs_total"] == 35
+        assert len(data["jobs"]) == limit
         assert data["jobs"][0]["id"] == 1
-        assert [j["id"] for j in data["jobs"][1:3]] == [2, 3]
-        assert len(db.rows("SELECT * FROM jobs")) == 15
+        if limit >= 3:
+            assert [j["id"] for j in data["jobs"][1:3]] == [2, 3]
+        assert len(db.rows("SELECT * FROM jobs")) == 35
+
+
+def test_activity_limit_follows_saved_quota_without_restart(tmp_path, sample):
+    app = create_app(tmp_path, start_engine=False)
+    db = app.state.db
+    for number in range(20):
+        paper_id = db.add_papers([replace(sample, external_id=f"test-{number}")])[0]
+        db.queue(paper_id, "summary")
+    db.execute("UPDATE jobs SET status='done'")
+    with TestClient(app, base_url="http://localhost") as client:
+        assert len(client.get("/api/activity").json()["jobs"]) == 10
+        settings = client.get("/api/settings").json()
+        settings["bulletin_limit"] = 15
+        assert client.put("/api/settings", json=settings, headers={"X-Radar-Request": "1"}).status_code == 200
+        data = client.get("/api/activity").json()
+        assert data["job_limit"] == 15
+        assert len(data["jobs"]) == 15
+        assert all(job["status"] == "done" for job in data["jobs"])
+        assert data["jobs_total"] == 20
+
+
+def test_activity_frontend_only_renders_processing_and_uses_dynamic_limit():
+    from radar.app import STATIC
+
+    script = (STATIC / "app.js").read_text()
+    activity = script.split("async function activity() {", 1)[1].split("function field(", 1)[0]
+    assert "data.runs" not in activity
+    assert "status.sources" not in activity
+    assert "Búsquedas" not in activity
+    assert "data.job_limit ?? settings.bulletin_limit" in activity
+    assert "data.jobs.slice(0,limit)" in activity
+    assert "Máximo ${limit}" in activity
+    assert "cancelButton(job)" in activity
+    assert 'button("Reintentar"' in activity
 
 
 def test_queue_cancel_endpoint_is_local_and_preserves_result_and_other_jobs(tmp_path, sample):

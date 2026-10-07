@@ -82,7 +82,7 @@ async def run_mode(mode, overrides, chunks, paper, work, model, briefs=False):
                 "OLLAMA_MAX_LOADED_MODELS": "1", "OLLAMA_NUM_PARALLEL": "1", **overrides})
     samples, results, exchanges, responses = [], [], [], []
     log_path = directory / "ollama.log"
-    llm_module.HOST = host  # Solo este proceso de prueba; no modifica el servicio Paper Radar.
+    llm_module.HOST = host  # Solo este proceso de prueba; no modifica el servicio de la aplicación.
     llm = Ollama()
     server = None
     sampler = None
@@ -199,7 +199,7 @@ async def main(args):
         response = await client.get("http://127.0.0.1:8765/api/status")
         response.raise_for_status()
         if response.json()["current_job"] or response.json()["scanning"]:
-            raise RuntimeError("Detén las tareas de Paper Radar antes de probar.")
+            raise RuntimeError("Detén las tareas de la aplicación antes de probar.")
         response = await client.get("http://127.0.0.1:11434/api/ps")
         response.raise_for_status()
         if response.json().get("models"):

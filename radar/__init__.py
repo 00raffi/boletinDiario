@@ -1,1 +1,1 @@
-"""Paper Radar: fuentes controladas, inferencia local."""
+"""boletinDiario: fuentes controladas, inferencia local."""

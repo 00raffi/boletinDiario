@@ -15,7 +15,7 @@ class DesktopNotifier:
         process = None
         try:
             process = await asyncio.create_subprocess_exec(
-                executable, "--app-name=Lecturas de investigación", "--icon=emblem-documents",
+                executable, "--app-name=boletinDiario", "--icon=emblem-documents",
                 "--urgency=normal", "--expire-time=10000", "--", summary, body,
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
             )

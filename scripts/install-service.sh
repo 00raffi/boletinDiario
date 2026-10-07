@@ -5,7 +5,7 @@ if [[ "$ROOT" == *'"'* || "$ROOT" == *'%'* || "$ROOT" == *$'\n'* ]]; then
   echo 'La ruta no puede contener comillas, %, ni saltos de línea.' >&2
   exit 1
 fi
-UNIT="$HOME/.config/systemd/user/paper-radar.service"
+UNIT="$HOME/.config/systemd/user/boletinDiario.service"
 if [[ -e "$UNIT" ]]; then
   echo "Ya existe $UNIT. Revísalo antes de sobrescribirlo." >&2
   exit 1
@@ -17,13 +17,13 @@ fi
 mkdir -p "$HOME/.config/systemd/user"
 cat > "$UNIT" <<EOF
 [Unit]
-Description=Paper Radar - observatorio local de investigación
+Description=boletinDiario - observatorio local de investigación
 After=network-online.target
 
 [Service]
 Type=simple
 WorkingDirectory=$ROOT
-ExecStart="$ROOT/.venv/bin/python" -m radar
+ExecStart="$ROOT/.venv/bin/python" -m boletinDiario
 Environment=PYTHONUNBUFFERED=1
 Restart=on-failure
 RestartSec=15
@@ -36,6 +36,6 @@ RestrictSUIDSGID=true
 WantedBy=default.target
 EOF
 systemctl --user daemon-reload
-systemctl --user enable --now paper-radar.service
+systemctl --user enable --now boletinDiario.service
 echo 'Servicio activado. Abre http://127.0.0.1:8765'
 echo 'Arranca al iniciar sesión; recupera las búsquedas pendientes. No requiere privilegios root.'

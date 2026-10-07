@@ -96,7 +96,7 @@ class ColibriSource(RequestSource):
     async def discover(self, start, end, categories, *, keywords=()):
         papers, seen = [], set()
         requests = 0
-        async with httpx.AsyncClient(timeout=60, trust_env=False, headers={"User-Agent": "PersonalResearchReader/0.2"}) as client:
+        async with httpx.AsyncClient(timeout=60, trust_env=False, headers={"User-Agent": "boletinDiario/0.1 (personal local reader)"}) as client:
             for scope in effective_scopes(categories):
                 scope = uuid(scope)
                 previous_date = None

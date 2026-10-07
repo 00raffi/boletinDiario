@@ -18,7 +18,7 @@ Realizada en este equipo el 5 de octubre de 2026.
 - La generación libre de una síntesis a partir de notas añadió expansiones inventadas
   de siglas, incluso con instrucciones restrictivas. Se eliminó esa etapa: el informe
   final agrupa notas verificables por sección sin generar hechos adicionales.
-- Servicio de usuario `paper-radar.service` instalado y activo, con cita diaria a
+- Servicio de usuario de la aplicación instalado y activo, con cita diaria a
   las 07:00 `America/Montevideo`. La cola inicial continúa en segundo plano.
 
 Pendiente: evaluación científica sistemática en 10–20 papers, comparación con
@@ -38,7 +38,7 @@ que la interpretación del modelo sea correcta; los informes requieren revisión
 
 - Se observó `llama-server` con aproximadamente **11,6 GiB RSS** y contexto 4096.
   No se encontró historial acumulado en las peticiones de la aplicación.
-- Se detuvo temporalmente Paper Radar y se descargó solo `gemma3:4b` por la API
+- Se detuvo temporalmente la aplicación y se descargó solo `gemma3:4b` por la API
   `keep_alive: 0`. El runner desapareció y el uso total pasó de unos 15 a 4,2 GiB.
 - Prueba posterior con cuatro peticiones cortas: runner de aproximadamente 3,53 GiB
   RSS, seguido de descarga correcta. No constituye prueba de estabilidad con prompts largos.
@@ -142,7 +142,7 @@ RAM confirmada se desactivó el reciclado intermedio y se mantiene la descarga a
 finalizar cada tarea.
 
 Ollama dedicado instalado como servicio de usuario en `127.0.0.1:11435`:
-`paper-radar-ollama.service`, complemento `paper-radar.service.d/ollama.conf`.
+servicio dedicado de inferencia y complemento de la aplicación.
 No modifica el servicio de sistema. Ajustes anteriores respaldados en
 `data/settings-before-qwen-20261006T005300Z.json`.
 
@@ -258,7 +258,7 @@ una tarea/modelo simultáneo, `LLAMA_ARG_CACHE_RAM=0`,
 `unload_after_paper=true`. Presupuesto habitual: 24 fragmentos de 4000 caracteres,
 10 resúmenes y 3 informes diarios a las 07:00 America/Montevideo.
 Instancia dedicada con `MemoryHigh=6G`, `MemoryMax=10G` y comprobación de API lista
-antes de iniciar Paper Radar. El Ollama de sistema no se modificó.
+antes de iniciar la aplicación. El Ollama de sistema no se modificó.
 
 Esta es la configuración **mejor validada en estos ensayos**, no una búsqueda
 exhaustiva de hiperparámetros ni certificación científica de Qwen. La estabilidad
